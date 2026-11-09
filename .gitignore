@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-backend/mini-erp-server
 
 # Build outputs
 dist/
@@ -13,3 +12,5 @@ build/
 # OS files
 .DS_Store
 Thumbs.db
+
+product_requirements_document.md
