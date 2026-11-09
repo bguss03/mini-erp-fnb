@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/setuptests.ts","./src/vite-env.d.ts","./src/__tests__/pos_components.test.tsx","./src/components/checkoutmodal.tsx","./src/components/inventorymodule.tsx","./src/components/lowstockalert.tsx","./src/components/poscartpanel.tsx","./src/components/shiftmodule.tsx","./src/services/api.ts","./src/types/erp.ts"],"version":"5.6.3"}

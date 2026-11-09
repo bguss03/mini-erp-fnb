@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+backend/mini-erp-server
+
+# Build outputs
+dist/
+build/
+
+# Environment files
+.env
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
