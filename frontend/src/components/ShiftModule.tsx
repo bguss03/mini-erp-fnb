@@ -29,12 +29,10 @@ export const ShiftModule: React.FC<ShiftModuleProps> = ({
   onOpenShift,
   onCloseShift,
 }) => {
-  // State Buka Shift (Clock-in)
   const [cashierName, setCashierName] = useState('Siti (Shift Siang)');
   const [openingCash, setOpeningCash] = useState('500000');
   const [openNotes, setOpenNotes] = useState('Modal kasir standar');
 
-  // State Tutup Shift (Clock-out)
   const [actualCash, setActualCash] = useState<string>(
     activeShift ? String(activeShift.expected_cash) : '500000'
   );
@@ -83,11 +81,9 @@ export const ShiftModule: React.FC<ShiftModuleProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Panel Atas: Status Shift Saat Ini (Clock-In / Clock-Out) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {activeShift ? (
           <>
-            {/* Ringkasan Kas Real-Time Shift Aktif */}
             <div className="lg:col-span-7 bg-white rounded-2xl border border-neutral-200 p-6 shadow-xs space-y-5">
               <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
                 <div className="flex items-center gap-3">
@@ -158,7 +154,6 @@ export const ShiftModule: React.FC<ShiftModuleProps> = ({
               </p>
             </div>
 
-            {/* Form Clock-out Shift (Tutup Kasir & Rekonsiliasi) */}
             <form
               onSubmit={handleCloseSubmit}
               className="lg:col-span-5 bg-white rounded-2xl border border-neutral-200 p-6 shadow-xs space-y-4"
@@ -185,7 +180,6 @@ export const ShiftModule: React.FC<ShiftModuleProps> = ({
                 />
               </div>
 
-              {/* Preview Discrepancy / Variance */}
               <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-between text-xs">
                 <span className="font-semibold text-neutral-600">
                   Estimasi Selisih Kas (Variance):
@@ -309,7 +303,6 @@ export const ShiftModule: React.FC<ShiftModuleProps> = ({
         )}
       </div>
 
-      {/* Tabel Laporan Rekonsiliasi & Selisih Kas (Discrepancy Report) */}
       <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs overflow-hidden">
         <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">
           <div>

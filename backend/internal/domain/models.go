@@ -2,7 +2,6 @@ package domain
 
 import "time"
 
-// RawMaterial merepresentasikan stok fisik bahan baku di dapur (Modul 2)
 type RawMaterial struct {
 	ID          int       `json:"id"`
 	SKU         string    `json:"sku"`
@@ -27,11 +26,10 @@ type RawMaterialInput struct {
 
 type StockAdjustmentInput struct {
 	QuantityChange float64 `json:"quantity_change"`
-	MovementType   string  `json:"movement_type"` // RESTOCK atau ADJUSTMENT
+	MovementType   string  `json:"movement_type"`
 	Notes          string  `json:"notes"`
 }
 
-// RecipeItem merepresentasikan 1 komponen bahan baku dalam resep menu (BOM)
 type RecipeItem struct {
 	ID               int     `json:"id,omitempty"`
 	ProductID        int     `json:"product_id,omitempty"`
@@ -43,7 +41,6 @@ type RecipeItem struct {
 	QuantityRequired float64 `json:"quantity_required"`
 }
 
-// Product merepresentasikan menu F&B beserta daftar resepnya (Modul 1 & 2)
 type Product struct {
 	ID          int          `json:"id"`
 	SKU         string       `json:"sku"`
@@ -70,7 +67,6 @@ type ProductInput struct {
 	Recipes     []RecipeItem `json:"recipes"`
 }
 
-// CartItemInput merepresentasikan item dalam keranjang pesanan saat checkout
 type CartItemInput struct {
 	ProductID   int     `json:"product_id"`
 	ProductName string  `json:"product_name,omitempty"`
@@ -78,14 +74,13 @@ type CartItemInput struct {
 	Quantity    int     `json:"quantity"`
 }
 
-// CheckoutInput merepresentasikan payload request checkout POS (Modul 1)
 type CheckoutInput struct {
 	ShiftID       *int            `json:"shift_id,omitempty"`
 	CustomerName  string          `json:"customer_name"`
-	OrderType     string          `json:"order_type"`     // DINE_IN, TAKE_AWAY
-	PaymentMethod string          `json:"payment_method"` // CASH, QRIS, DEBIT
+	OrderType     string          `json:"order_type"`
+	PaymentMethod string          `json:"payment_method"`
 	CashReceived  float64         `json:"cash_received"`
-	TaxRate       *float64        `json:"tax_rate,omitempty"` // Default 10% (PB1)
+	TaxRate       *float64        `json:"tax_rate,omitempty"`
 	Items         []CartItemInput `json:"items"`
 }
 
@@ -128,7 +123,6 @@ type Transaction struct {
 	CreatedAt       time.Time               `json:"created_at"`
 }
 
-// Shift merepresentasikan sesi kerja kasir & rekonsiliasi kas (Modul 3)
 type Shift struct {
 	ID               int        `json:"id"`
 	CashierName      string     `json:"cashier_name"`
@@ -139,9 +133,9 @@ type Shift struct {
 	ExpectedCash     float64    `json:"expected_cash"`
 	ActualCash       *float64   `json:"actual_cash,omitempty"`
 	Variance         *float64   `json:"variance,omitempty"`
-	DiscrepancyType  string     `json:"discrepancy_type"` // MATCH, SHORTAGE, OVERAGE, OPEN
+	DiscrepancyType  string     `json:"discrepancy_type"`
 	Notes            string     `json:"notes"`
-	Status           string     `json:"status"` // OPEN, CLOSED
+	Status           string     `json:"status"`
 	OpenedAt         time.Time  `json:"opened_at"`
 	ClosedAt         *time.Time `json:"closed_at,omitempty"`
 }

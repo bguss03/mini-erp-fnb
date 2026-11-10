@@ -63,7 +63,6 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({
     'MATERIALS'
   );
 
-  // State form tambah bahan baku
   const [showAddMaterial, setShowAddMaterial] = useState(false);
   const [matName, setMatName] = useState('');
   const [matUnit, setMatUnit] = useState('Gram');
@@ -71,12 +70,10 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({
   const [matMinStock, setMatMinStock] = useState('300');
   const [matCost, setMatCost] = useState('25');
 
-  // State modal restock
   const [restockTarget, setRestockTarget] = useState<RawMaterial | null>(null);
   const [restockQty, setRestockQty] = useState('500');
   const [restockNotes, setRestockNotes] = useState('Restock dapur harian');
 
-  // State form tambah/edit Menu & Resep BOM
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showProductForm, setShowProductForm] = useState(false);
   const [prodName, setProdName] = useState('');
@@ -162,7 +159,6 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({
 
   return (
     <div className="space-y-5">
-      {/* Sub-navigation bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-neutral-200 shadow-xs">
         <div className="flex items-center gap-2 overflow-x-auto pb-1.5 sm:pb-0 max-w-full no-scrollbar">
           <button
@@ -246,7 +242,6 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({
         </div>
       </div>
 
-      {/* SUBTAB 1: MASTER BAHAN BAKU */}
       {subTab === 'MATERIALS' && (
         <div className="space-y-4">
           {showAddMaterial && (
@@ -409,7 +404,6 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({
         </div>
       )}
 
-      {/* SUBTAB 2: MANAJEMEN RESEP & BOM (RECIPE LINKAGE) */}
       {subTab === 'RECIPES' && (
         <div className="space-y-4">
           {showProductForm && (
@@ -475,7 +469,6 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({
                 </div>
               </div>
 
-              {/* Editor Resep (Bill of Materials) */}
               <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-200 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
@@ -631,7 +624,6 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({
         </div>
       )}
 
-      {/* SUBTAB 3: RIWAYAT MUTASI STOK OTOMATIS */}
       {subTab === 'MOVEMENTS' && (
         <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
@@ -704,7 +696,6 @@ export const InventoryModule: React.FC<InventoryModuleProps> = ({
         </div>
       )}
 
-      {/* Modal Restock Bahan Baku */}
       {restockTarget && (
         <div className="fixed inset-0 z-50 bg-neutral-900/50 flex items-center justify-center p-4">
           <form

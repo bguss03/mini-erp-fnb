@@ -40,13 +40,12 @@ func TestIntegration_AtomicCheckoutAndMultiRawMaterialDeduction(t *testing.T) {
 	st := NewStore(db)
 	ctx := context.Background()
 
-	// 1. Buat 2 bahan baku khusus untuk pengujian integrasi
 	suffix := time.Now().Format("150405.000")
 	beras, err := st.CreateRawMaterial(ctx, domain.RawMaterialInput{
 		SKU:         "TEST-RM-A-" + suffix,
 		Name:        "Test Beras Integrasi " + suffix,
 		Unit:        "Gram",
-		Stock:       1000, // 1000g
+		Stock:       1000,
 		MinStock:    200,
 		CostPerUnit: 15,
 	})
@@ -59,7 +58,7 @@ func TestIntegration_AtomicCheckoutAndMultiRawMaterialDeduction(t *testing.T) {
 		SKU:         "TEST-RM-B-" + suffix,
 		Name:        "Test Daun Pisang Integrasi " + suffix,
 		Unit:        "Lembar",
-		Stock:       10, // 10 lembar
+		Stock:       10,
 		MinStock:    3,
 		CostPerUnit: 500,
 	})
@@ -68,7 +67,6 @@ func TestIntegration_AtomicCheckoutAndMultiRawMaterialDeduction(t *testing.T) {
 	}
 	defer func() { _ = st.DeleteRawMaterial(ctx, daunPisang.ID) }()
 
-	// 2. Buat produk dengan BOM yang mengaitkan kedua bahan baku (1 porsi = 150g Beras + 1 Lembar Daun Pisang)
 	prod, err := st.CreateProduct(ctx, domain.ProductInput{
 		SKU:         "TEST-MN-" + suffix,
 		Name:        "Test Nasi Bakar Integrasi " + suffix,
@@ -88,7 +86,6 @@ func TestIntegration_AtomicCheckoutAndMultiRawMaterialDeduction(t *testing.T) {
 		_ = st.DeleteProduct(ctx, prod.ID)
 	}()
 
-	// 3. Lakukan Checkout 2 porsi -> harus memotong 300g Beras (sisa 700g) & 2 Lembar Daun Pisang (sisa 8 Lembar)
 	txResult, err := st.CheckoutTransaction(ctx, domain.CheckoutInput{
 		CustomerName:  "Tester Integrasi",
 		OrderType:     "DINE_IN",
@@ -105,13 +102,11 @@ func TestIntegration_AtomicCheckoutAndMultiRawMaterialDeduction(t *testing.T) {
 	if txResult.Status != "PAID" {
 		t.Errorf("expected transaction status PAID, got %s", txResult.Status)
 	}
-	// 2 * 30.000 = 60.000, PB1 10% = 6.000, Grand Total = 66.000, Change = 34.000
 	if txResult.Subtotal != 60000 || txResult.TaxAmount != 6000 || txResult.GrandTotal != 66000 || txResult.ChangeAmount != 34000 {
 		t.Errorf("unexpected totals: subtotal=%.2f tax=%.2f grand=%.2f change=%.2f",
 			txResult.Subtotal, txResult.TaxAmount, txResult.GrandTotal, txResult.ChangeAmount)
 	}
 
-	// Verifikasi stok di tabel raw_materials terpotong serentak
 	materials, err := st.ListRawMaterials(ctx)
 	if err != nil {
 		t.Fatalf("failed listing raw materials: %v", err)
@@ -132,8 +127,6 @@ func TestIntegration_AtomicCheckoutAndMultiRawMaterialDeduction(t *testing.T) {
 		t.Errorf("expected daun pisang stock 8 Lembar after checkout, got %.2f", daunAfter)
 	}
 
-	// 4. Uji ACID Rollback: Pesan 10 porsi (butuh 1500g Beras & 10 Lembar Daun Pisang, padahal sisa 700g & 8 Lembar)
-	// Transaksi harus gagal DAN stok Beras maupun Daun Pisang tidak boleh berubah sedikit pun!
 	_, err = st.CheckoutTransaction(ctx, domain.CheckoutInput{
 		CustomerName:  "Tester Rollback",
 		OrderType:     "DINE_IN",
@@ -150,7 +143,6 @@ func TestIntegration_AtomicCheckoutAndMultiRawMaterialDeduction(t *testing.T) {
 		t.Fatalf("expected *domain.InsufficientStockError, got %T: %v", err, err)
 	}
 
-	// Pastikan stok tetap 700g dan 8 Lembar (Rollback berhasil menjaga integritas ACID)
 	materialsAfterRollback, err := st.ListRawMaterials(ctx)
 	if err != nil {
 		t.Fatalf("failed listing raw materials after rollback: %v", err)

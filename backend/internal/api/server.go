@@ -28,7 +28,6 @@ func NewServer(st *store.Store) *Server {
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
-	// CORS Headers
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -72,11 +71,9 @@ func writeError(w http.ResponseWriter, status int, message string, details any) 
 }
 
 func (s *Server) registerRoutes() {
-	// Healthcheck & Dashboard
 	s.mux.HandleFunc("GET /api/health", s.handleHealth)
 	s.mux.HandleFunc("GET /api/dashboard", s.handleDashboard)
 
-	// Modul 2: Raw Materials (Master Bahan Baku & Low Stock Alert)
 	s.mux.HandleFunc("GET /api/raw-materials", s.handleListRawMaterials)
 	s.mux.HandleFunc("POST /api/raw-materials", s.handleCreateRawMaterial)
 	s.mux.HandleFunc("PUT /api/raw-materials/{id}", s.handleUpdateRawMaterial)
@@ -84,19 +81,16 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("DELETE /api/raw-materials/{id}", s.handleDeleteRawMaterial)
 	s.mux.HandleFunc("GET /api/stock-movements", s.handleListStockMovements)
 
-	// Modul 1 & 2: Products (Master Menu & Resep BOM)
 	s.mux.HandleFunc("GET /api/products", s.handleListProducts)
 	s.mux.HandleFunc("GET /api/products/{id}", s.handleGetProduct)
 	s.mux.HandleFunc("POST /api/products", s.handleCreateProduct)
 	s.mux.HandleFunc("PUT /api/products/{id}", s.handleUpdateProduct)
 	s.mux.HandleFunc("DELETE /api/products/{id}", s.handleDeleteProduct)
 
-	// Modul 1: POS Transactions & Cart Calculation
 	s.mux.HandleFunc("POST /api/pos/calculate", s.handleCalculateCart)
 	s.mux.HandleFunc("POST /api/transactions", s.handleCheckoutTransaction)
 	s.mux.HandleFunc("GET /api/transactions", s.handleListTransactions)
 
-	// Modul 3: HR & Cash Management (Shift Kasir & Rekonsiliasi)
 	s.mux.HandleFunc("GET /api/shifts/active", s.handleGetActiveShift)
 	s.mux.HandleFunc("GET /api/shifts", s.handleListShifts)
 	s.mux.HandleFunc("POST /api/shifts/open", s.handleOpenShift)
@@ -119,8 +113,6 @@ func (s *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, summary)
 }
-
-// --- Raw Materials Handlers ---
 
 func (s *Server) handleListRawMaterials(w http.ResponseWriter, r *http.Request) {
 	materials, err := s.store.ListRawMaterials(r.Context())
@@ -217,8 +209,6 @@ func (s *Server) handleListStockMovements(w http.ResponseWriter, r *http.Request
 	writeJSON(w, http.StatusOK, movements)
 }
 
-// --- Products & BOM Recipes Handlers ---
-
 func (s *Server) handleListProducts(w http.ResponseWriter, r *http.Request) {
 	products, err := s.store.ListProducts(r.Context())
 	if err != nil {
@@ -300,8 +290,6 @@ func (s *Server) handleDeleteProduct(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"message": "Menu berhasil dihapus"})
 }
 
-// --- POS Calculation & Checkout Handlers ---
-
 func (s *Server) handleCalculateCart(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Items   []domain.CartItemInput `json:"items"`
@@ -355,8 +343,6 @@ func (s *Server) handleListTransactions(w http.ResponseWriter, r *http.Request) 
 	}
 	writeJSON(w, http.StatusOK, txs)
 }
-
-// --- Shift Management (Modul 3) Handlers ---
 
 func (s *Server) handleGetActiveShift(w http.ResponseWriter, r *http.Request) {
 	sh, err := s.store.GetActiveShift(r.Context())

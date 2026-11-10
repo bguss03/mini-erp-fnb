@@ -51,7 +51,6 @@ export const PosCartPanel: React.FC<PosCartPanelProps> = ({
       aria-label="Keranjang Pesanan"
       className="bg-white border border-neutral-200 rounded-2xl shadow-sm flex flex-col h-full overflow-hidden"
     >
-      {/* Header Keranjang */}
       <div className="p-4 border-b border-neutral-100 flex items-center justify-between bg-white">
         <div className="flex items-center gap-2.5">
           <div
@@ -92,7 +91,6 @@ export const PosCartPanel: React.FC<PosCartPanelProps> = ({
         </div>
       </div>
 
-      {/* Info Pelanggan & Tipe Pesanan */}
       <div className="px-4 py-3 bg-neutral-50/70 border-b border-neutral-100 space-y-2.5">
         <div className="grid grid-cols-2 gap-1.5 bg-neutral-200/70 p-1 rounded-xl">
           <button
@@ -138,7 +136,6 @@ export const PosCartPanel: React.FC<PosCartPanelProps> = ({
         />
       </div>
 
-      {/* Daftar Item Keranjang */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[200px]">
         {items.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center py-10 text-neutral-400">
@@ -208,7 +205,6 @@ export const PosCartPanel: React.FC<PosCartPanelProps> = ({
         )}
       </div>
 
-      {/* Ringkasan Kalkulasi Transaksi & Tombol Bayar */}
       <div className="p-4 border-t border-neutral-200 bg-neutral-50/60 space-y-3">
         <div className="space-y-1.5 text-xs">
           <div className="flex justify-between text-neutral-600">

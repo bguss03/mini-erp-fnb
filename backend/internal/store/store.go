@@ -31,10 +31,6 @@ func (s *Store) DB() *sql.DB {
 	return s.db
 }
 
-// ============================================================================
-// Modul 2: Inventory & Raw Materials CRUD
-// ============================================================================
-
 func (s *Store) ListRawMaterials(ctx context.Context) ([]domain.RawMaterial, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, sku, name, unit, stock, min_stock, cost_per_unit, created_at, updated_at
@@ -237,10 +233,6 @@ func (s *Store) ListStockMovements(ctx context.Context, limit int) ([]domain.Sto
 	}
 	return movements, rows.Err()
 }
-
-// ============================================================================
-// Modul 1 & 2: Products (Menu) & Recipe Linkage (BOM)
-// ============================================================================
 
 func (s *Store) ListProducts(ctx context.Context) ([]domain.Product, error) {
 	rows, err := s.db.QueryContext(ctx, `
@@ -451,16 +443,12 @@ func (s *Store) DeleteProduct(ctx context.Context, id int) error {
 	return nil
 }
 
-// ============================================================================
-// Modul 1 & 2: Atomic POS Checkout & Automated BOM Stock Deduction (ACID)
-// ============================================================================
-
 func (s *Store) CheckoutTransaction(ctx context.Context, input domain.CheckoutInput) (domain.Transaction, error) {
 	if len(input.Items) == 0 {
 		return domain.Transaction{}, domain.ErrEmptyCart
 	}
 
-	taxRate := 10.0 // Default PB1 10%
+	taxRate := 10.0
 	if input.TaxRate != nil {
 		taxRate = *input.TaxRate
 	}
@@ -477,14 +465,12 @@ func (s *Store) CheckoutTransaction(ctx context.Context, input domain.CheckoutIn
 		customerName = "Pelanggan Umum"
 	}
 
-	// Mulai Database Transaction (ACID Compliance)
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return domain.Transaction{}, err
 	}
 	defer tx.Rollback()
 
-	// 1. Cari Shift Aktif jika ShiftID tidak dikirim eksplisit
 	var activeShiftID *int
 	if input.ShiftID != nil && *input.ShiftID > 0 {
 		activeShiftID = input.ShiftID
@@ -498,7 +484,6 @@ func (s *Store) CheckoutTransaction(ctx context.Context, input domain.CheckoutIn
 		}
 	}
 
-	// 2. Ambil data Produk & Resep BOM untuk produk yang dipesan
 	productIDs := make([]int, 0, len(input.Items))
 	seenProd := make(map[int]bool)
 	for _, it := range input.Items {
@@ -539,7 +524,6 @@ func (s *Store) CheckoutTransaction(ctx context.Context, input domain.CheckoutIn
 	}
 	prodRows.Close()
 
-	// Lengkapi harga dan nama produk dari database agar tidak bisa dimanipulasi dari client
 	enrichedItems := make([]domain.CartItemInput, len(input.Items))
 	for i, item := range input.Items {
 		prod, ok := productMap[item.ProductID]
@@ -554,19 +538,16 @@ func (s *Store) CheckoutTransaction(ctx context.Context, input domain.CheckoutIn
 		}
 	}
 
-	// 3. Kalkulasi Subtotal, Tax (PB1 10%), dan Grand Total
 	subtotal, taxAmount, grandTotal, err := domain.CalculateTransactionTotals(enrichedItems, taxRate)
 	if err != nil {
 		return domain.Transaction{}, err
 	}
 
-	// 4. Validasi pembayaran dan hitung kembalian
 	cashReceived, changeAmount, err := domain.CalculatePaymentChange(grandTotal, input.CashReceived, paymentMethod)
 	if err != nil {
 		return domain.Transaction{}, err
 	}
 
-	// 5. Ambil resep BOM untuk produk-produk di keranjang
 	recipeRows, err := tx.QueryContext(ctx, `
 		SELECT product_id, raw_material_id, quantity_required
 		FROM product_recipes
@@ -586,7 +567,6 @@ func (s *Store) CheckoutTransaction(ctx context.Context, input domain.CheckoutIn
 	}
 	recipeRows.Close()
 
-	// 6. Hitung total kebutuhan tiap bahan baku dan kunci baris raw_materials dengan SELECT ... FOR UPDATE
 	requiredDeductions, err := domain.CalculateBOMDeductions(enrichedItems, recipesByProduct)
 	if err != nil {
 		return domain.Transaction{}, err
@@ -621,13 +601,11 @@ func (s *Store) CheckoutTransaction(ctx context.Context, input domain.CheckoutIn
 		matRows.Close()
 	}
 
-	// 7. Validasi ketersediaan stok bahan baku; jika ada yang kurang -> return error & otomatis Rollback!
 	updatedStocks, err := domain.ValidateAndApplyStockDeductions(currentMaterials, requiredDeductions)
 	if err != nil {
 		return domain.Transaction{}, err
 	}
 
-	// 8. Simpan header transaksi dengan status PAID
 	invoiceNumber := fmt.Sprintf("INV-%s-%04d", time.Now().Format("20060102-150405"), time.Now().Nanosecond()%10000)
 	var createdTx domain.Transaction
 	err = tx.QueryRowContext(ctx, `
@@ -653,7 +631,6 @@ func (s *Store) CheckoutTransaction(ctx context.Context, input domain.CheckoutIn
 		return domain.Transaction{}, err
 	}
 
-	// 9. Simpan item-item transaksi
 	createdTx.Items = make([]domain.TransactionItem, 0, len(enrichedItems))
 	for _, item := range enrichedItems {
 		itemSubtotal := domain.RoundCurrency(item.UnitPrice * float64(item.Quantity))
@@ -671,7 +648,6 @@ func (s *Store) CheckoutTransaction(ctx context.Context, input domain.CheckoutIn
 		createdTx.Items = append(createdTx.Items, ti)
 	}
 
-	// 10. Potong stok bahan baku secara atomik & catat stock_movements
 	createdTx.StockDeductions = make([]domain.StockDeductionSummary, 0, len(rawIDs))
 	for _, rawID := range rawIDs {
 		deductedQty := requiredDeductions[rawID]
@@ -706,7 +682,6 @@ func (s *Store) CheckoutTransaction(ctx context.Context, input domain.CheckoutIn
 		})
 	}
 
-	// 11. Jika pembayaran CASH dan ada shift aktif, perbarui total penjualan tunai & expected cash pada shift tersebut
 	if activeShiftID != nil && paymentMethod == "CASH" {
 		_, err := tx.ExecContext(ctx, `
 			UPDATE shifts
@@ -719,7 +694,6 @@ func (s *Store) CheckoutTransaction(ctx context.Context, input domain.CheckoutIn
 		}
 	}
 
-	// 12. Commit seluruh transaksi database
 	if err := tx.Commit(); err != nil {
 		return domain.Transaction{}, err
 	}
@@ -798,10 +772,6 @@ func (s *Store) ListTransactions(ctx context.Context, limit int) ([]domain.Trans
 
 	return txs, itemRows.Err()
 }
-
-// ============================================================================
-// Modul 3: HR & Cash Management (Rekonsiliasi Shift Kasir)
-// ============================================================================
 
 func (s *Store) enrichShiftStats(ctx context.Context, sh *domain.Shift) error {
 	var nonCash float64
@@ -917,7 +887,6 @@ func (s *Store) ListShifts(ctx context.Context, limit int) ([]domain.Shift, erro
 	return shifts, rows.Err()
 }
 
-// OpenShift (Clock-in Shift / Buka Kasir) mencatat Saldo Awal Kasir
 func (s *Store) OpenShift(ctx context.Context, input domain.OpenShiftInput) (domain.Shift, error) {
 	input.CashierName = strings.TrimSpace(input.CashierName)
 	if input.CashierName == "" {
@@ -960,7 +929,6 @@ func (s *Store) OpenShift(ctx context.Context, input domain.OpenShiftInput) (dom
 	return sh, nil
 }
 
-// CloseShift (Clock-out Shift / Tutup Kasir) menghitung Expected Cash dan mencatat Variance terhadap Actual Cash
 func (s *Store) CloseShift(ctx context.Context, shiftID int, input domain.CloseShiftInput) (domain.Shift, error) {
 	if input.ActualCash < 0 {
 		return domain.Shift{}, errors.New("hitungan uang fisik tidak boleh negatif")
@@ -991,7 +959,6 @@ func (s *Store) CloseShift(ctx context.Context, shiftID int, input domain.CloseS
 		return domain.Shift{}, ErrShiftAlreadyClose
 	}
 
-	// Hitung ulang total penjualan tunai dari tabel transactions pada shift ini untuk akurasi 100%
 	var verifiedCashSales float64
 	err = tx.QueryRowContext(ctx, `
 		SELECT COALESCE(SUM(grand_total), 0)

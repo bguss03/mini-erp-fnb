@@ -42,7 +42,6 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [bannerError, setBannerError] = useState<string | null>(null);
 
-  // State POS & Keranjang
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -91,7 +90,6 @@ export const App: React.FC = () => {
     void loadAllData();
   }, [loadAllData]);
 
-  // Handler Keranjang POS
   const handleAddToCart = (product: Product) => {
     if (product.max_portions <= 0) return;
     setCart((prev) => {
@@ -157,7 +155,6 @@ export const App: React.FC = () => {
     }
   };
 
-  // Handler Inventory & BOM
   const handleCreateRawMaterial = async (payload: {
     sku?: string;
     name: string;
@@ -201,7 +198,6 @@ export const App: React.FC = () => {
     await loadAllData();
   };
 
-  // Handler Shift Kasir
   const handleOpenShift = async (payload: {
     cashier_name: string;
     opening_cash: number;
@@ -242,7 +238,6 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white text-neutral-900 flex flex-col">
-      {/* Top Navbar Responsive Header */}
       <header className="sticky top-0 z-30 bg-white border-b border-neutral-200 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div
@@ -269,7 +264,6 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Modul Navigation Pills (Desktop: hidden md:flex) */}
         <nav className="hidden md:flex items-center gap-1.5 bg-neutral-100 p-1.5 rounded-2xl">
           {(
             [
@@ -328,7 +322,6 @@ export const App: React.FC = () => {
           })}
         </nav>
 
-        {/* Status Shift Aktif & Tombol Refresh */}
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -336,14 +329,9 @@ export const App: React.FC = () => {
             className={`px-2.5 sm:px-3 py-1.5 rounded-xl border text-[11px] sm:text-xs font-bold flex items-center gap-1.5 sm:gap-2 transition ${
               activeShift
                 ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                : 'border-[#FC6C01] bg-[#FFF3EB] text-[#FC6C01]'
+                : 'border-[#FF6666] bg-[#ff4646] text-white'
             }`}
           >
-            <span
-              className={`w-2 h-2 rounded-full shrink-0 ${
-                activeShift ? 'bg-emerald-500' : 'bg-[#FC6C01]'
-              }`}
-            />
             <span className="truncate max-w-[130px] sm:max-w-none">
               {activeShift
                 ? `${activeShift.cashier_name} • ${formatRupiah(
@@ -364,7 +352,6 @@ export const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content Responsive Container */}
       <main className="flex-1 p-3.5 sm:p-6 pb-28 md:pb-8 max-w-[1600px] w-full mx-auto">
         {bannerError && (
           <div className="mb-4 p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs font-medium text-red-700">
@@ -372,7 +359,6 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* Global Low Stock Alert (#FC6C01) */}
         <LowStockAlert
           materials={rawMaterials}
           onNavigateToInventory={
@@ -382,10 +368,8 @@ export const App: React.FC = () => {
           }
         />
 
-        {/* MODUL 1: POINT OF SALES (POS) - LANDSCAPE SPLIT VIEW */}
         {activeTab === 'POS' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Panel Kiri (8 Kolom): Filter Kategori & Grid Menu */}
             <section className="lg:col-span-8 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-neutral-200 shadow-xs">
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -425,7 +409,6 @@ export const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* Katalog Kartu Menu */}
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filteredProducts.map((product) => {
                   const inCart = cart.find(
@@ -471,7 +454,6 @@ export const App: React.FC = () => {
                             {product.description}
                           </p>
 
-                          {/* Ringkasan Resep BOM pada Kartu Menu */}
                           {product.recipes.length > 0 && (
                             <div className="mt-3 pt-2.5 border-t border-neutral-100">
                               <span className="block text-[10px] font-bold uppercase text-neutral-400 mb-1">
@@ -516,7 +498,6 @@ export const App: React.FC = () => {
               </div>
             </section>
 
-            {/* Panel Kanan (4 Kolom): Keranjang Pesanan di Layar Desktop */}
             <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-20">
               <PosCartPanel
                 items={cart}
@@ -538,7 +519,6 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* Floating Mobile Cart Bar (Khusus Layar Mobile di Tab POS) */}
         {activeTab === 'POS' && cart.length > 0 && (
           <div className="lg:hidden fixed bottom-16 left-0 right-0 z-30 p-3 bg-gradient-to-t from-white via-white/95 to-transparent">
             <button
@@ -561,7 +541,6 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* Mobile Cart Bottom Sheet Modal */}
         {isMobileCartOpen && (
           <div className="lg:hidden fixed inset-0 z-50 bg-neutral-900/50 backdrop-blur-xs flex flex-col justify-end">
             <div className="bg-white rounded-t-3xl max-h-[85vh] h-[85vh] flex flex-col overflow-hidden shadow-2xl">
@@ -590,7 +569,6 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* MODUL 2: INVENTORY & RECIPE MANAGEMENT (BOM) */}
         {activeTab === 'INVENTORY' && (
           <InventoryModule
             rawMaterials={rawMaterials}
@@ -602,7 +580,6 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* MODUL 3: HR & CASH MANAGEMENT (REKONSILIASI SHIFT) */}
         {activeTab === 'SHIFT' && (
           <ShiftModule
             activeShift={activeShift}
@@ -612,7 +589,6 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* RIWAYAT TRANSAKSI POS */}
         {activeTab === 'TRANSACTIONS' && (
           <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs overflow-hidden">
             <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">
@@ -697,7 +673,6 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Modal Checkout Pembayaran */}
       <CheckoutModal
         isOpen={isCheckoutOpen}
         items={cart}
@@ -709,7 +684,6 @@ export const App: React.FC = () => {
         onConfirmCheckout={handleConfirmCheckout}
       />
 
-      {/* Modal Bukti Transaksi Berhasil & Deduksi Stok BOM */}
       {lastCompletedTx && (
         <div className="fixed inset-0 z-50 bg-neutral-900/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl border border-neutral-200 shadow-xl w-full max-w-md p-6 space-y-4">
@@ -790,7 +764,6 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Fixed Bottom Navigation Bar Khusus Layar Mobile (md:hidden) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-neutral-200 px-3 py-1.5 flex items-center justify-around shadow-lg">
         {(
           [

@@ -28,7 +28,6 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const erpApi = {
-  // Products & BOM Recipes
   listProducts: () => request<Product[]>('/products'),
   createProduct: (payload: {
     sku?: string;
@@ -62,7 +61,6 @@ export const erpApi = {
   deleteProduct: (id: number) =>
     request<{ message: string }>(`/products/${id}`, { method: 'DELETE' }),
 
-  // Raw Materials (Inventory)
   listRawMaterials: () => request<RawMaterial[]>('/raw-materials'),
   createRawMaterial: (payload: {
     sku?: string;
@@ -104,7 +102,6 @@ export const erpApi = {
     }),
   listStockMovements: () => request<StockMovement[]>('/stock-movements'),
 
-  // POS Transactions
   checkout: (payload: {
     shift_id?: number;
     customer_name: string;
@@ -119,7 +116,6 @@ export const erpApi = {
     }),
   listTransactions: () => request<Transaction[]>('/transactions'),
 
-  // Shift & Cash Management
   getActiveShift: () =>
     request<{ active_shift: Shift | null }>('/shifts/active'),
   listShifts: () => request<Shift[]>('/shifts'),

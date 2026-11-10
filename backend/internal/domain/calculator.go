@@ -48,8 +48,6 @@ func RoundCurrency(val float64) float64 {
 	return math.Round(val*100) / 100
 }
 
-// CalculateTransactionTotals menghitung Subtotal, Tax (misal PB1 10%), dan Grand Total
-// secara murni tanpa ketergantungan database.
 func CalculateTransactionTotals(items []CartItemInput, taxRatePercent float64) (subtotal, taxAmount, grandTotal float64, err error) {
 	if len(items) == 0 {
 		return 0, 0, 0, ErrEmptyCart
@@ -75,7 +73,6 @@ func CalculateTransactionTotals(items []CartItemInput, taxRatePercent float64) (
 	return subtotal, taxAmount, grandTotal, nil
 }
 
-// CalculatePaymentChange memvalidasi pembayaran dan menghitung uang kembalian.
 func CalculatePaymentChange(grandTotal, cashReceived float64, paymentMethod string) (effectiveCashReceived, changeAmount float64, err error) {
 	if paymentMethod == "CASH" {
 		if cashReceived < grandTotal {
@@ -83,12 +80,9 @@ func CalculatePaymentChange(grandTotal, cashReceived float64, paymentMethod stri
 		}
 		return RoundCurrency(cashReceived), RoundCurrency(cashReceived - grandTotal), nil
 	}
-	// Untuk metode non-tunai (QRIS / DEBIT), nominal diterima sama persis dengan Grand Total
 	return RoundCurrency(grandTotal), 0, nil
 }
 
-// CalculateBOMDeductions menghitung total kebutuhan tiap bahan baku (RawMaterialID -> TotalQty)
-// berdasarkan daftar item yang dipesan dan resep (BOM) masing-masing produk.
 func CalculateBOMDeductions(items []CartItemInput, recipesByProduct map[int][]RecipeItem) (map[int]float64, error) {
 	if len(items) == 0 {
 		return nil, ErrEmptyCart
@@ -111,8 +105,6 @@ func CalculateBOMDeductions(items []CartItemInput, recipesByProduct map[int][]Re
 	return deductions, nil
 }
 
-// ValidateAndApplyStockDeductions memeriksa apakah stok bahan baku mencukupi dan mengembalikan
-// peta stok akhir setelah dipotong. Jika ada bahan baku yang kurang, mengembalikan InsufficientStockError.
 func ValidateAndApplyStockDeductions(
 	currentMaterials map[int]RawMaterial,
 	requiredDeductions map[int]float64,
@@ -155,12 +147,10 @@ func ValidateAndApplyStockDeductions(
 	return updatedStocks, nil
 }
 
-// IsLowStock menentukan apakah bahan baku berada pada atau di bawah ambang batas minimal (Low Stock Alert #FC6C01).
 func IsLowStock(stock, minStock float64) bool {
 	return stock <= minStock
 }
 
-// CalculateMaxPortions menghitung berapa porsi maksimal suatu menu dapat dibuat dari stok bahan baku saat ini.
 func CalculateMaxPortions(recipes []RecipeItem) int {
 	if len(recipes) == 0 {
 		return 999
@@ -184,8 +174,6 @@ func CalculateMaxPortions(recipes []RecipeItem) int {
 	return maxPortions
 }
 
-// CalculateShiftReconciliation menghitung Expected Cash (Saldo Awal + Total Penjualan Tunai)
-// dan Variance / Discrepancy (Actual Cash - Expected Cash) beserta kategori selisihnya.
 func CalculateShiftReconciliation(openingCash, totalCashSales, actualCash float64) (expectedCash, variance float64, discrepancyType string) {
 	expectedCash = RoundCurrency(openingCash + totalCashSales)
 	variance = RoundCurrency(actualCash - expectedCash)
@@ -195,9 +183,9 @@ func CalculateShiftReconciliation(openingCash, totalCashSales, actualCash float6
 		variance = 0
 		discrepancyType = "MATCH"
 	case variance < 0:
-		discrepancyType = "SHORTAGE" // Kas kurang (defisit)
+		discrepancyType = "SHORTAGE"
 	default:
-		discrepancyType = "OVERAGE" // Kas lebih (surplus)
+		discrepancyType = "OVERAGE"
 	}
 	return expectedCash, variance, discrepancyType
 }

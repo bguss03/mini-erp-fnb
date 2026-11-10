@@ -8,8 +8,8 @@ import (
 func TestCalculateTransactionTotals(t *testing.T) {
 	t.Run("menghitung subtotal, pajak PB1 10%, dan grand total secara akurat", func(t *testing.T) {
 		items := []CartItemInput{
-			{ProductID: 1, ProductName: "Nasi Bakar Ayam Kemangi", UnitPrice: 28000, Quantity: 2}, // 56.000
-			{ProductID: 4, ProductName: "Es Kopi Susu Gula Aren", UnitPrice: 22000, Quantity: 1},  // 22.000
+			{ProductID: 1, ProductName: "Nasi Bakar Ayam Kemangi", UnitPrice: 28000, Quantity: 2},
+			{ProductID: 4, ProductName: "Es Kopi Susu Gula Aren", UnitPrice: 22000, Quantity: 1},
 		}
 		subtotal, tax, grandTotal, err := CalculateTransactionTotals(items, 10.0)
 		if err != nil {
@@ -73,20 +73,20 @@ func TestCalculatePaymentChange(t *testing.T) {
 
 func TestCalculateBOMDeductionsAndValidation(t *testing.T) {
 	recipes := map[int][]RecipeItem{
-		1: { // Nasi Bakar: 150g Beras (ID 1), 1 Lembar Daun Pisang (ID 2), 80g Ayam (ID 3)
+		1: {
 			{ProductID: 1, RawMaterialID: 1, QuantityRequired: 150},
 			{ProductID: 1, RawMaterialID: 2, QuantityRequired: 1},
 			{ProductID: 1, RawMaterialID: 3, QuantityRequired: 80},
 		},
-		3: { // Nasi Goreng: 180g Beras (ID 1), 50g Ayam (ID 3)
+		3: {
 			{ProductID: 3, RawMaterialID: 1, QuantityRequired: 180},
 			{ProductID: 3, RawMaterialID: 3, QuantityRequired: 50},
 		},
 	}
 
 	items := []CartItemInput{
-		{ProductID: 1, Quantity: 2}, // 300g Beras, 2 Daun Pisang, 160g Ayam
-		{ProductID: 3, Quantity: 1}, // 180g Beras, 50g Ayam
+		{ProductID: 1, Quantity: 2},
+		{ProductID: 3, Quantity: 1},
 	}
 
 	deductions, err := CalculateBOMDeductions(items, recipes)
@@ -121,7 +121,7 @@ func TestCalculateBOMDeductionsAndValidation(t *testing.T) {
 
 	t.Run("stok kurang mengembalikan InsufficientStockError untuk memicu rollback", func(t *testing.T) {
 		currentStock := map[int]RawMaterial{
-			1: {ID: 1, Name: "Beras", Unit: "Gram", Stock: 300}, // Kurang! Butuh 480g
+			1: {ID: 1, Name: "Beras", Unit: "Gram", Stock: 300},
 			2: {ID: 2, Name: "Daun Pisang", Unit: "Lembar", Stock: 10},
 			3: {ID: 3, Name: "Ayam Suwir", Unit: "Gram", Stock: 500},
 		}

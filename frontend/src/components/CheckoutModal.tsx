@@ -78,7 +78,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       className="fixed inset-0 z-50 bg-neutral-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4"
     >
       <div className="bg-white rounded-2xl border border-neutral-200 shadow-xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden">
-        {/* Header Modal */}
         <div className="px-5 py-3.5 sm:px-6 sm:py-4 border-b border-neutral-100 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-base sm:text-lg font-bold text-neutral-900">
@@ -99,7 +98,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto">
-          {/* Ringkasan Tagihan */}
           <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-4 space-y-2">
             <div className="flex justify-between text-xs text-neutral-600">
               <span>Subtotal ({items.length} menu)</span>
@@ -127,7 +125,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           </div>
 
-          {/* Pilihan Metode Pembayaran */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">
               Metode Pembayaran
@@ -171,7 +168,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           </div>
 
-          {/* Input Uang Diterima (Khusus CASH) */}
           {paymentMethod === 'CASH' && (
             <div className="space-y-2.5">
               <label
@@ -230,7 +226,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           )}
 
-          {/* Tombol Aksi */}
           <div className="flex items-center justify-end gap-2.5 pt-2">
             <button
               type="button"
